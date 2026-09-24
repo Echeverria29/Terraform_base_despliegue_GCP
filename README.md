@@ -124,7 +124,7 @@ gcloud auth application-default login
 ```bash
 cd IAC
 terraform init
-terraform plan -var-file="environment/dev/env.tfvars.json" -out=tfplan
+terraform plan -var-file="environment/dev/env.tfvars.json"
 terraform apply -var-file="environment/dev/env.tfvars.json"
 ```
 
