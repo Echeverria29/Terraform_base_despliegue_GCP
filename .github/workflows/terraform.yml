@@ -59,13 +59,25 @@ jobs:
         run: |
           echo "${{ secrets.KEYGCP }}" | base64 -d > key.json
 
+      # run con el archivo env.tfvars.json directo para pruebas:
+      # run: |
+      #     terraform init
+      #     terraform plan -var-file="environment/${{ vars.ENVIRONMENT }}/env.tfvars.json" -out=tfplan
+
+      #run variables de GitHub
       - name: Terraform Init & Plan
         run: |
           terraform init
-          terraform plan -var-file="environment/${{ vars.ENVIRONMENT }}/env.tfvars.json" -out=tfplan
+          terraform plan \
+            -var="project=${{ vars.GCP_PROJECT }}" \
+            -var="region=${{ vars.GCP_REGION }}" \
+            -var="bucket_name=${{ vars.BUCKET_NAME }}" \
+            -var="provider=${{ vars.PROVIDER }}" \
+            -out=tfplan
+        
         env:
           GOOGLE_CREDENTIALS: key.json
-
+        
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
