@@ -58,23 +58,39 @@ jobs:
       - name: Decode GCP Credentials
         run: |
           echo "${{ secrets.KEYGCP }}" | base64 -d > key.json
-
-      # run con el archivo env.tfvars.json directo para pruebas:
-      # run: |
+      
+      # =========================================================================
+      # ALTERNATIVA LOCAL (Comentada para referencia):
+      # Si quisieras usar un archivo .tfvars.json estático local (ignorado en .gitignore)
+      # en lugar de variables de GitHub, el comando sería:
+      #
+      # - name: Terraform Init & Plan (Local tfvars)
+      #   run: |
       #     terraform init
       #     terraform plan -var-file="environment/${{ vars.ENVIRONMENT }}/env.tfvars.json" -out=tfplan
+      #   env:
+      #     GOOGLE_CREDENTIALS: key.json
+      # =========================================================================
 
-      #run variables de GitHub
+      # MÉTODOS ACTUAL SEGURO: Genera el archivo .tfvars.json al vuelo usando las Variables de GitHub
+      # Esto evita exponer datos sensibles en el repositorio público manteniendo la compatibilidad con los -var-file
+      - name: Generate Secure tfvars file
+        run: |
+          cat << EOF > environment/${{ vars.ENVIRONMENT }}/env.tfvars.json
+          {
+            "labels": {
+              "provider": "${{ vars.PROVIDER }}"
+            },
+            "project": "${{ vars.GCP_PROJECT }}",
+            "region": "${{ vars.GCP_REGION }}",
+            "bucket_name": "${{ vars.BUCKET_NAME }}"
+          }
+          EOF
+
       - name: Terraform Init & Plan
         run: |
           terraform init
-          terraform plan \
-            -var="project=${{ vars.GCP_PROJECT }}" \
-            -var="region=${{ vars.GCP_REGION }}" \
-            -var="bucket_name=${{ vars.BUCKET_NAME }}" \
-            -var="provider=${{ vars.PROVIDER }}" \
-            -out=tfplan
-        
+          terraform plan -var-file="environment/${{ vars.ENVIRONMENT }}/env.tfvars.json" -out=tfplan
         env:
           GOOGLE_CREDENTIALS: key.json
         
