@@ -15,7 +15,7 @@ graph TD
     A --> D[Module: BigQuery Routines / SP]
     A --> E[Module: BigQuery Views]
 
-    B -->|Capas Medallion: Bronze / Silver / Gold
+    B --> F[Capas Medallion: Bronze / Silver / Gold]
     C --> D
     C --> E
 ```
